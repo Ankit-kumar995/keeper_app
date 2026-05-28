@@ -26,12 +26,10 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ Fix: Close sidebar on ALL screen sizes after navigation
   const handleNavClick = (path) => {
     navigate(path);
-    // Close sidebar on mobile after navigation
-    if (window.innerWidth < 1024) {
-      toggleSidebar();
-    }
+    toggleSidebar();
   };
 
   const { user: authUser, logout } = useAuth();
@@ -63,9 +61,10 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           </div>
         </div>
 
+        {/* ✅ Fix: Removed "hidden lg:block" — button now visible on ALL screen sizes */}
         <button
           onClick={toggleSidebar}
-          className="p-1.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-slate-800 transition shrink-0 hidden lg:block"
+          className="p-1.5 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-slate-800 transition shrink-0"
           title="Collapse Sidebar"
         >
           <ChevronLeft size={18} />
@@ -106,7 +105,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
               Get reminders and keep your assets in shape.
             </p>
             <button 
-              onClick={() => navigate('/maintenance')}
+              onClick={() => { navigate('/maintenance'); toggleSidebar(); }}
               className="w-full mt-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-bold py-1.5 rounded-lg transition"
             >
               Enable Reminders
@@ -121,7 +120,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
 
       {/* 3. Footer Profile */}
       <div className="p-5 border-t border-slate-100 flex items-center justify-between bg-white shrink-0">
-        <div onClick={() => navigate("/settings")} className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity overflow-hidden">
+        <div onClick={() => { navigate("/settings"); toggleSidebar(); }} className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity overflow-hidden">
           <img
             src={user.profilePic}
             alt={user.name}
