@@ -6,7 +6,7 @@ import {
   logout,
   registerUser,
   loginUser,
-} from "../controllers/authController.js";
+} from "../controllers/AuthController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
 
