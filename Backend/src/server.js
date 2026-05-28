@@ -6,7 +6,7 @@ import path from "path";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
-import itemRoutes from "./routes/itemsroutes.js";
+import itemRoutes from "./routes/itemsRoutes.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 import "./services/reminderCron.js";
 
@@ -16,7 +16,6 @@ connectDB();
 
 const app = express();
 
-// ✅ FIXED: methods aur allowedHeaders add kiye
 app.use(cors({
   origin: ["http://localhost:5173", "https://your-frontend-deployment.vercel.app"],
   credentials: true,
@@ -35,11 +34,14 @@ app.get("/", (req, res) => {
   res.send("Keeper App Backend is running successfully! 🚀");
 });
 
-app.use("/api/auth",      authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/items",     itemRoutes);
+app.use("/api/items", itemRoutes);
 
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT} 🚀`));
+
+app.listen(PORT, () => 
+  console.log(`Server running on port ${PORT} 🚀`)
+);
