@@ -12,7 +12,6 @@ const Layout = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    // On mobile, default to closed. On desktop, use saved preference or default to open
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
     if (isMobile) return false;
     const saved = localStorage.getItem("sidebarOpen");
@@ -84,40 +83,30 @@ const Layout = () => {
         />
       )}
 
-      {/* 1. बाईं ओर साइडबार (इसमें toggleSidebar प्रोप भेजा गया है) */}
-      {/* Mobile: fixed drawer, Desktop: inline sidebar */}
+      {/* ✅ Fix: Desktop — sidebar properly shows/hides with width animation */}
       <div
-        className={`h-screen shrink-0 transition-all duration-300 ease-in-out overflow-hidden fixed lg:relative z-50 lg:z-auto ${
-          isSidebarOpen
-            ? "w-[290px] border-r border-slate-200"
-            : "w-0 lg:w-[290px] lg:border-r-0"
-        }`}
+        className={`h-screen shrink-0 transition-all duration-300 ease-in-out overflow-hidden
+          fixed lg:relative z-50 lg:z-auto
+          ${isSidebarOpen ? "w-[290px] border-r border-slate-200" : "w-0 border-r-0"}
+        `}
       >
         <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       </div>
 
-      {/* 2. दायां मुख्य हिस्सा */}
+      {/* Main Content */}
       <div className="flex-1 h-screen flex flex-col min-w-0 bg-white">
         
-        {/* 3. ग्लोबल फिक्स्ड हेडर */}
+        {/* Header */}
         <header className="sticky top-0 z-50 h-[78px] w-full bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 lg:px-8 flex items-center justify-between shrink-0">
           
           <div className="flex items-center gap-2">
 
-            {/* Hamburger menu - always visible on mobile, only when closed on desktop */}
-            <button
-              onClick={toggleSidebar}
-              className="p-1.5 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition mr-1 shrink-0 lg:hidden"
-              title="Open Menu"
-            >
-              <Menu size={18} />
-            </button>
-            {/* Desktop-only toggle (when sidebar fully collapsed) */}
+            {/* ✅ Fix: Single hamburger button — visible on ALL screen sizes when sidebar is closed */}
             {!isSidebarOpen && (
               <button
                 onClick={toggleSidebar}
-                className="p-1.5 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition mr-1 shrink-0 hidden lg:block"
-                title="Open Sidebar"
+                className="p-1.5 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition mr-1 shrink-0"
+                title="Open Menu"
               >
                 <Menu size={18} />
               </button>
@@ -142,7 +131,7 @@ const Layout = () => {
             </div>
           </div>
 
-          {/* ग्लोबल सर्च बार और प्रोफाइल */}
+          {/* Search & Profile */}
           <div className="flex items-center gap-2 md:gap-6">
             <div className="relative w-44 sm:w-64 md:w-80 hidden md:block">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -179,7 +168,7 @@ const Layout = () => {
 
         </header>
 
-        {/* 4. स्क्रॉल होने वाला पेज कंटेंट */}
+        {/* Page Content */}
         <div className="flex-1 overflow-y-auto bg-white">
           <Outlet context={[searchTerm, setSearchTerm]} />
         </div>
