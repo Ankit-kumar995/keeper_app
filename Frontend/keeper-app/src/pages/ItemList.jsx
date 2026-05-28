@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { Eye, Edit, Trash2, SlidersHorizontal, Package } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
@@ -49,6 +50,7 @@ const getImageUrl = (item) => {
 
 const ItemList = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -86,7 +88,7 @@ const ItemList = () => {
 
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [user]);
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this asset?")) {

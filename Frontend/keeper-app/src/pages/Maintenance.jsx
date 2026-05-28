@@ -1,24 +1,26 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import { 
-  Wrench, 
-  Calendar, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
+import {
+  Wrench,
+  Calendar,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
   SlidersHorizontal,
   X
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const Maintenance = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all"); // "all", "overdue", "soon", "scheduled"
-  
+
   // Sync with the global search bar in Layout.jsx via Outlet Context
   const [searchTerm, setSearchTerm] = useOutletContext();
 
@@ -55,7 +57,7 @@ const Maintenance = () => {
 
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [user]);
 
   // Check if service date is overdue
   const isOverdue = (dateStr) => {

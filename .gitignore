@@ -1,0 +1,21 @@
+# Environment files (sensitive)
+Backend/.env
+Frontend/keeper-app/.env
+*.env.local
+*.env.production
+
+# Uploads (user data)
+Backend/uploads/*
+
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.sw?
+*.suo

@@ -58,9 +58,13 @@ export const googleLogin = async (req, res) => {
         profilePic,
         googleId,
       });
-    } else if (!user.googleId) {
-      user.googleId = googleId;
+    } else {
+      // Update profilePic every time user logs in with Google
+      if (!user.googleId) {
+        user.googleId = googleId;
+      }
       user.profilePic = profilePic;
+      user.name = name; // Update name in case it changed
       await user.save();
     }
 

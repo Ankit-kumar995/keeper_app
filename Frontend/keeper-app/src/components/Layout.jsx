@@ -9,9 +9,12 @@ const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(""); 
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    // On mobile, default to closed. On desktop, use saved preference or default to open
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+    if (isMobile) return false;
     const saved = localStorage.getItem("sidebarOpen");
     return saved !== null ? JSON.parse(saved) : true;
   });
@@ -72,11 +75,22 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-white">
-      
+
+      {/* Mobile Overlay Backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
       {/* 1. बाईं ओर साइडबार (इसमें toggleSidebar प्रोप भेजा गया है) */}
-      <div 
-        className={`h-screen shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
-          isSidebarOpen ? "w-[290px] border-r border-slate-200" : "w-0 border-r-0"
+      {/* Mobile: fixed drawer, Desktop: inline sidebar */}
+      <div
+        className={`h-screen shrink-0 transition-all duration-300 ease-in-out overflow-hidden fixed lg:relative z-50 lg:z-auto ${
+          isSidebarOpen
+            ? "w-[290px] border-r border-slate-200"
+            : "w-0 lg:w-[290px] lg:border-r-0"
         }`}
       >
         <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -89,12 +103,20 @@ const Layout = () => {
         <header className="sticky top-0 z-50 h-[78px] w-full bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 lg:px-8 flex items-center justify-between shrink-0">
           
           <div className="flex items-center gap-2">
-            
-            {/* यह ओपन करने का बटन केवल तब दिखेगा जब साइडबार पूरी तरह बंद हो */}
+
+            {/* Hamburger menu - always visible on mobile, only when closed on desktop */}
+            <button
+              onClick={toggleSidebar}
+              className="p-1.5 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition mr-1 shrink-0 lg:hidden"
+              title="Open Menu"
+            >
+              <Menu size={18} />
+            </button>
+            {/* Desktop-only toggle (when sidebar fully collapsed) */}
             {!isSidebarOpen && (
-              <button 
-                onClick={toggleSidebar} 
-                className="p-1.5 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition mr-1 shrink-0" 
+              <button
+                onClick={toggleSidebar}
+                className="p-1.5 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition mr-1 shrink-0 hidden lg:block"
                 title="Open Sidebar"
               >
                 <Menu size={18} />
@@ -121,8 +143,8 @@ const Layout = () => {
           </div>
 
           {/* ग्लोबल सर्च बार और प्रोफाइल */}
-          <div className="flex items-center gap-6">
-            <div className="relative w-44 sm:w-64 md:w-80">
+          <div className="flex items-center gap-2 md:gap-6">
+            <div className="relative w-44 sm:w-64 md:w-80 hidden md:block">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 value={searchTerm}

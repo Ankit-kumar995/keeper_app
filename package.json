@@ -1,0 +1,30 @@
+{
+  "name": "upkeepr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "backend": "npm run dev --prefix Backend",
+    "frontend": "npm run dev --prefix Frontend/keeper-app",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ankit-kumar995/keeper_app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ankit-kumar995/keeper_app/issues"
+  },
+  "homepage": "https://github.com/Ankit-kumar995/keeper_app#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "mongodb": "^7.2.0"
+  }
+}

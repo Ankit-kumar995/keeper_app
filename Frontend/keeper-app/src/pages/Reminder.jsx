@@ -10,11 +10,13 @@ import {
   Eye,
   SlidersHorizontal
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const Reminders = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState("all"); // "all", "warranty", "service"
@@ -49,7 +51,7 @@ const Reminders = () => {
       }
     };
     fetchItems();
-  }, []);
+  }, [user]);
 
   // Dynamically generate warranty and service reminder logs
   const generateRemindersList = (itemsList) => {
