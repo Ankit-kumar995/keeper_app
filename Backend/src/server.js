@@ -6,7 +6,7 @@ import path from "path";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
-import itemRoutes from "./routes/itemsRoutes.js";
+import itemRoutes from "./routes/itemsroutes.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 import "./services/reminderCron.js";
 
