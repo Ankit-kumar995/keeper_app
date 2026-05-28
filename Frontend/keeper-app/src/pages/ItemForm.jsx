@@ -4,7 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Save } from "lucide-react";
 
 // Define the backend API base URL using Vite environment variables with a localhost fallback
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+// Ya to code change karo:
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const API_BASE_URL = `${API_URL}/api/items`;
 
 const ItemForm = () => {
