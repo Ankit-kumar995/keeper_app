@@ -11,13 +11,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        // Secure cookies will be sent automatically by the browser
+        // Axios interceptor will automatically attach the Authorization Header from localStorage
         const res = await API.get("/auth/me");
         if (res.data.success) {
           setUser(res.data.user);
         }
       } catch (err) {
         console.log("No active session found");
+        localStorage.removeItem("token"); // Clean up token if session/token expired
         setUser(null);
       } finally {
         setLoading(false);
@@ -30,7 +31,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await API.post("/auth/login", { email, password });
-      // Token is saved in HttpOnly cookie automatically, no localStorage needed
+      
+      // ✅ FIX: Save token to localStorage for HTTP Header Authorization
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+      
       setUser(res.data.user);
     } catch (err) {
       console.error("Login Error:", err.response?.data || err.message);
@@ -38,11 +44,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🔴 ADDED: Standard Email/Password Registration
+  // Standard Email/Password Registration
   const register = async (name, email, password) => {
     try {
       const res = await API.post("/auth/register", { name, email, password });
-      // Token is saved in HttpOnly cookie automatically
+      
+      // ✅ FIX: Save token to localStorage for HTTP Header Authorization
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+      
       setUser(res.data.user);
     } catch (err) {
       console.error("Registration Error:", err.response?.data || err.message);
@@ -56,6 +67,12 @@ export const AuthProvider = ({ children }) => {
       const res = await API.post("/auth/google", {
         credential: response.credential,
       });
+      
+      // ✅ FIX: Save token to localStorage for HTTP Header Authorization
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+      
       setUser(res.data.user);
     } catch (err) {
       console.error("Google Login Backend Error:", err.response?.data || err.message);
@@ -71,13 +88,14 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Logout API Error:", err);
     } finally {
+      // ✅ FIX: Clear token from localStorage on logout
+      localStorage.removeItem("token");
       setUser(null);
       window.location.href = "/login";
     }
   };
 
   return (
-    // 🔴 UPDATED: Added 'register' inside the Provider value
     <AuthContext.Provider value={{ user, login, register, loginWithGoogle, logout, loading }}>
       {!loading && children} 
     </AuthContext.Provider>
