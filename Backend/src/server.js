@@ -37,6 +37,10 @@ app.get("/", (req, res) => {
   res.send("Keeper App Backend is running successfully! 🚀");
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/items", itemRoutes);
