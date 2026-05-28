@@ -3,8 +3,6 @@ import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
 // ================= TOKEN GENERATE =================
 const generateToken = (user) => {
   return jwt.sign(
@@ -12,12 +10,12 @@ const generateToken = (user) => {
       id: user._id,
       email: user.email,
     },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || "default_secret",
     { expiresIn: "7d" }
   );
 };
 
-// ✅ FIX: Ek helper - saari jagah same options, path: "/" add kiya
+// ================= COOKIE OPTIONS =================
 const cookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
@@ -34,6 +32,10 @@ export const googleLogin = async (req, res) => {
     if (!credential) {
       return res.status(400).json({ message: "Credential is required" });
     }
+
+    // ✅ FIX: Client ko function ke andar initialize kiya hai.
+    // Isse jab request aayegi, tab tak process.env load ho chuka hoga.
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
     const ticket = await client.verifyIdToken({
       idToken: credential,
@@ -70,7 +72,7 @@ export const googleLogin = async (req, res) => {
 
     const token = generateToken(user);
 
-    res.cookie("token", token, cookieOptions()); // ✅ FIX
+    res.cookie("token", token, cookieOptions());
 
     const userObj = user.toObject();
     delete userObj.password;
@@ -119,7 +121,7 @@ export const registerUser = async (req, res) => {
 
     const token = generateToken(user);
 
-    res.cookie("token", token, cookieOptions()); // ✅ FIX
+    res.cookie("token", token, cookieOptions());
 
     const userObj = user.toObject();
     delete userObj.password;
@@ -170,7 +172,7 @@ export const loginUser = async (req, res) => {
 
     const token = generateToken(user);
 
-    res.cookie("token", token, cookieOptions()); // ✅ FIX
+    res.cookie("token", token, cookieOptions());
 
     const userObj = user.toObject();
     delete userObj.password;
@@ -217,7 +219,7 @@ export const logout = (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/", // ✅ ASLI FIX - yeh missing tha
+    path: "/",
   });
 
   res.json({
