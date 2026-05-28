@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const formatDate = (dateStr) => {
   if (!dateStr || dateStr === "null" || dateStr === "undefined" || dateStr === "N/A") return "N/A";
