@@ -45,23 +45,19 @@ const Login = () => {
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden select-none bg-slate-950">
       
       {/* 
-        Full-Screen Cyber-Security Vault Background.
-        Local image ('/login-bg.png') will load if you save your uploaded screenshot in the public folder.
-        Otherwise, it falls back to a high-quality sci-fi matrix mesh background.
+        Full-Screen Cyber-Security Vault Background (Keeper App Blue Theme)
       */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <img 
-          src="/login-bg.png" 
+          src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?q=80&w=1920" 
           alt="Keeper Secure Digital Network" 
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            // Fallback to high-quality abstract tech background if the local image is not found in public folder
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?q=80&w=1920";
-          }}
+          className="w-full h-full object-cover filter brightness-[0.25] contrast-[1.10]"
         />
-        {/* Soft layout blending overlay */}
-        <div className="absolute inset-0 bg-slate-950/20"></div>
+        {/* Soft layout blending overlay to make the card stand out */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/80 to-slate-950"></div>
+        {/* Glowing lights representing encryption nodes */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[130px] pointer-events-none"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[130px] pointer-events-none"></div>
       </div>
 
       {/* Main Login Card - Replicated Exactly from Image (No Bottom Badges) */}
