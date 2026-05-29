@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Calendar,
   Activity,
-  User,
   Clock,
   Search
 } from "lucide-react";
@@ -295,67 +294,42 @@ const Dashboard = () => {
 
       <div className="p-4 lg:p-6 space-y-6 w-full max-w-full">
 
-        {/* PROFILE HEADER PANEL */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-10 -mt-10 opacity-40 blur-lg pointer-events-none"></div>
-          <div className="flex items-center gap-4 z-10">
-            <div className="relative">
-              <img 
-                src={user.profilePic} 
-                alt={user.name} 
-                className="w-12 h-12 rounded-xl object-cover border-2 border-indigo-50 shadow-sm"
-              />
-              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+        {/* TOP STATUS BAR (No duplicate Navbar) */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-gray-200/60">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider">System Live Metrics</h2>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-gray-900 tracking-tight">Welcome, {user.name}</h1>
-                <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border border-indigo-100">{user.role}</span>
-              </div>
-              <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
-                <Clock size={12} className="text-gray-400" />
-                <span>Last updated just now</span>
-                <span className="text-gray-300">•</span>
-                <span>{new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
-              </p>
-            </div>
+            <p className="text-xs text-gray-400 mt-0.5">Live database updated: {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
           </div>
-
-          <div className="flex items-center gap-2 z-10 shrink-0">
-            <div className="text-right hidden md:block mr-2">
-              <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider block">Operational Health</span>
-              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1 justify-end mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Active & Secure
-              </span>
-            </div>
-            
-            <Button
-              component={Link}
-              to="/items/new"
-              variant="contained"
-              startIcon={<PlusCircle size={14} />}
-              sx={{
-                backgroundColor: "#4f46e5",
-                color: "#ffffff",
-                fontWeight: "600",
-                borderRadius: "10px",
-                textTransform: "none",
-                fontSize: "12px",
-                padding: "8px 18px",
-                boxShadow: "0px 2px 4px rgba(79, 70, 229, 0.2)",
-                fontFamily: "inherit",
-                "&:hover": {
-                  backgroundColor: "#4338ca",
-                  boxShadow: "0px 4px 12px rgba(79, 70, 229, 0.3)",
-                },
-              }}
-            >
-              Quick Add Asset
-            </Button>
-          </div>
+          
+          <Button
+            component={Link}
+            to="/items/new"
+            variant="contained"
+            startIcon={<PlusCircle size={14} />}
+            sx={{
+              backgroundColor: "#4f46e5",
+              color: "#ffffff",
+              fontWeight: "600",
+              borderRadius: "10px",
+              textTransform: "none",
+              fontSize: "12px",
+              padding: "7px 16px",
+              boxShadow: "0px 2px 4px rgba(79, 70, 229, 0.15)",
+              fontFamily: "inherit",
+              "&:hover": {
+                backgroundColor: "#4338ca",
+                boxShadow: "0px 4px 12px rgba(79, 70, 229, 0.25)",
+              },
+            }}
+          >
+            Quick Add Asset
+          </Button>
         </div>
 
-        {/* STATS SECTION */}
+        {/* STATS SECTION - Beautiful modern cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
           <Link to="/items" className="block transform hover:-translate-y-1 transition-all duration-300">
             <StatCard title="Total Assets" value={totalItems} subtitle="Registered active devices" icon={Package} accentColor="indigo" progress={100} />
@@ -801,56 +775,79 @@ const Dashboard = () => {
   );
 };
 
-// PROFESSIONAL STAT CARD WITH GRADIENT PROGRESS SUB-INDICATORS
+// STAT CARD WITH MATCHING GRADIENTS, VIBRANT COLORS AND SMOOTH TRACKS
 const StatCard = ({ title, value, subtitle, icon: Icon, accentColor, progress }) => {
-  const accentClasses = {
-    indigo: "bg-indigo-600",
-    emerald: "bg-emerald-500",
-    amber: "bg-amber-500",
-    cyan: "bg-cyan-500"
+  const config = {
+    indigo: {
+      accent: "bg-indigo-600",
+      borderHover: "hover:border-indigo-400 hover:shadow-indigo-50/40",
+      iconBg: "bg-indigo-50 text-indigo-600 border-indigo-100",
+      track: "bg-indigo-50",
+      progressColor: "bg-indigo-600",
+      lightText: "text-indigo-600",
+      softBg: "bg-indigo-50/20"
+    },
+    emerald: {
+      accent: "bg-emerald-500",
+      borderHover: "hover:border-emerald-400 hover:shadow-emerald-50/40",
+      iconBg: "bg-emerald-50 text-emerald-600 border-emerald-100",
+      track: "bg-emerald-50",
+      progressColor: "bg-emerald-500",
+      lightText: "text-emerald-600",
+      softBg: "bg-emerald-50/20"
+    },
+    amber: {
+      accent: "bg-amber-500",
+      borderHover: "hover:border-amber-400 hover:shadow-amber-50/40",
+      iconBg: "bg-amber-50 text-amber-600 border-amber-100",
+      track: "bg-amber-50",
+      progressColor: "bg-amber-500",
+      lightText: "text-amber-600",
+      softBg: "bg-amber-50/20"
+    },
+    cyan: {
+      accent: "bg-cyan-500",
+      borderHover: "hover:border-cyan-400 hover:shadow-cyan-50/40",
+      iconBg: "bg-cyan-50 text-cyan-600 border-cyan-100",
+      track: "bg-cyan-50",
+      progressColor: "bg-cyan-500",
+      lightText: "text-cyan-600",
+      softBg: "bg-cyan-50/20"
+    }
   };
 
-  const borderHoverClasses = {
-    indigo: "hover:border-indigo-300",
-    emerald: "hover:border-emerald-300",
-    amber: "hover:border-amber-300",
-    cyan: "hover:border-cyan-300"
-  };
-
-  const iconBgClasses = {
-    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100",
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    amber: "bg-amber-50 text-amber-600 border-amber-100",
-    cyan: "bg-cyan-50 text-cyan-600 border-cyan-100"
-  };
+  const currentTheme = config[accentColor] || config.indigo;
 
   return (
-    <div className={`relative bg-white rounded-2xl p-4.5 border border-gray-200 transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between overflow-hidden group shadow-sm ${borderHoverClasses[accentColor]}`}>
+    <div className={`relative bg-white rounded-2xl p-5 border border-gray-200 transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between overflow-hidden group shadow-sm ${currentTheme.borderHover} hover:shadow-md`}>
       
       {/* Structural Accent Top Line */}
-      <div className={`absolute left-0 right-0 top-0 h-1.5 ${accentClasses[accentColor]} opacity-80`}></div>
+      <div className={`absolute left-0 right-0 top-0 h-1.5 ${currentTheme.accent} opacity-90`}></div>
 
-      <div className="flex items-start justify-between mt-1">
+      {/* Decorative Accent Glow (Only visible dynamically on hover) */}
+      <div className={`absolute right-0 bottom-0 w-24 h-24 rounded-full -mr-8 -mb-8 ${currentTheme.softBg} opacity-20 blur-xl pointer-events-none transition-all duration-500 group-hover:scale-150`}></div>
+
+      <div className="flex items-start justify-between mt-1 relative z-10">
         <div className="flex flex-col">
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{title}</p>
           <p className="text-2xl font-black text-gray-900 mt-1 leading-none tracking-tight">{value}</p>
-          <p className="text-[10px] text-gray-400 mt-2 font-semibold leading-tight">{subtitle}</p>
+          <p className="text-[10px] text-gray-400 mt-2.5 font-semibold leading-tight">{subtitle}</p>
         </div>
         
-        <div className={`w-9.5 h-9.5 rounded-xl border ${iconBgClasses[accentColor]} flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform duration-200`}>
-          <Icon size={16} />
+        <div className={`w-10 h-10 rounded-xl border ${currentTheme.iconBg} flex items-center justify-center shadow-sm shrink-0 group-hover:scale-105 transition-transform duration-200`}>
+          <Icon size={18} />
         </div>
       </div>
 
-      {/* Polish Indicator: Micro-Bar Graph inside each card */}
-      <div className="mt-4 pt-3.5 border-t border-gray-100/80 flex flex-col gap-1.5">
+      {/* Polish Indicator: Micro-Bar Graph with Theme-Integrated Colors */}
+      <div className="mt-5 pt-3.5 border-t border-gray-100/80 flex flex-col gap-1.5 relative z-10">
         <div className="flex items-center justify-between text-[9px] font-bold text-gray-400">
-          <span>PIPELINE</span>
-          <span>{progress}%</span>
+          <span className="tracking-wider uppercase">Pipeline health</span>
+          <span className={`${currentTheme.lightText}`}>{progress}%</span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-1 overflow-hidden">
+        <div className={`w-full ${currentTheme.track} rounded-full h-1.5 overflow-hidden`}>
           <div 
-            className={`h-full rounded-full transition-all duration-500 ${accentClasses[accentColor]}`} 
+            className={`h-full rounded-full transition-all duration-500 ${currentTheme.progressColor}`} 
             style={{ width: `${Math.max(8, progress)}%` }}
           ></div>
         </div>
