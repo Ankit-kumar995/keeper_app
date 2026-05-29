@@ -9,17 +9,47 @@ import { useAuth } from "../context/AuthContext";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+// ✅ Corrected and secured getDocUrl Helper Function
 const getDocUrl = (url) => {
   if (!url || url === "null" || url === "undefined" || url.trim() === "") return "";
-  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  
+  // Normalize backslashes to forward slashes
   let sanitizedUrl = url.replace(/\\/g, "/");
+  
+  // Handle absolute URLs (http:// or https://) and dynamic domains
+  if (sanitizedUrl.startsWith("http://") || sanitizedUrl.startsWith("https://") || sanitizedUrl.startsWith("data:")) {
+    if (sanitizedUrl.includes("/uploads/")) {
+      const index = sanitizedUrl.indexOf("uploads/");
+      sanitizedUrl = sanitizedUrl.slice(index);
+    } else {
+      return sanitizedUrl;
+    }
+  }
+  
+  // Ensure relative path starts with "uploads/" prefix
   if (sanitizedUrl.includes("uploads/")) {
     const index = sanitizedUrl.indexOf("uploads/");
     sanitizedUrl = sanitizedUrl.slice(index);
   } else {
-    sanitizedUrl = `uploads/${sanitizedUrl.startsWith("/") ? sanitizedUrl.slice(1) : sanitizedUrl}`;
+    const temp = sanitizedUrl.startsWith("/") ? sanitizedUrl.slice(1) : sanitizedUrl;
+    sanitizedUrl = `uploads/${temp}`;
   }
-  return `${API_URL}${sanitizedUrl.startsWith("/") ? "" : "/"}${sanitizedUrl}`;
+
+  // Clean up any generated broken strings
+  if (
+    sanitizedUrl === "undefined" ||
+    sanitizedUrl === "null" ||
+    sanitizedUrl.endsWith("/undefined") ||
+    sanitizedUrl.endsWith("/null")
+  ) {
+    return "";
+  }
+
+  // Securely join API_URL and sanitizedUrl without double slashes (//)
+  const cleanApiUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+  const cleanPath = sanitizedUrl.startsWith("/") ? sanitizedUrl : `/${sanitizedUrl}`;
+
+  return `${cleanApiUrl}${cleanPath}`;
 };
 
 const isPdf = (url) => url?.toLowerCase().includes(".pdf");
@@ -182,27 +212,83 @@ const ItemDetail = () => {
     fetchItemDetails();
   }, [id, user]);
 
+  // ✅ Corrected and secured getProductImage Helper Function
   const getProductImage = () => {
-    let rawUrl = item?.productImageUrl || item?.imageUrl || item?.productImage || item?.image || "";
+    let rawUrl =
+      item?.productImageUrl ||
+      item?.imageUrl ||
+      item?.productImage ||
+      item?.image ||
+      item?.filePath ||
+      item?.path ||
+      "";
+
     if (!rawUrl && item?.documents && Array.isArray(item.documents)) {
-      const foundImg = item.documents.find((d) => d && (d.name === "productImage" || d.type === "productImage"));
-      if (foundImg) rawUrl = foundImg.url;
+      const foundImg = item.documents.find(
+        (d) =>
+          d &&
+          (d.name === "productImage" ||
+            d.type === "productImage" ||
+            d.name === "image" ||
+            d.type === "image")
+      );
+      if (foundImg) rawUrl = foundImg.url || foundImg.path || "";
     }
-    if (!rawUrl || rawUrl === "null" || rawUrl === "undefined" || rawUrl.trim() === "") return "";
+
+    if (
+      !rawUrl ||
+      rawUrl === "null" ||
+      rawUrl === "undefined" ||
+      rawUrl.trim() === ""
+    ) {
+      return "";
+    }
+
     if (rawUrl.includes("drive.google.com")) {
-      const match = rawUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      const match =
+        rawUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+        rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
     }
+
     let sanitizedUrl = rawUrl.replace(/\\/g, "/");
-    if (sanitizedUrl.startsWith("http://") || sanitizedUrl.startsWith("https://") || sanitizedUrl.startsWith("data:")) return sanitizedUrl;
+
+    if (
+      sanitizedUrl.startsWith("http://") ||
+      sanitizedUrl.startsWith("https://") ||
+      sanitizedUrl.startsWith("data:")
+    ) {
+      if (sanitizedUrl.includes("/uploads/")) {
+        const index = sanitizedUrl.indexOf("uploads/");
+        sanitizedUrl = sanitizedUrl.slice(index);
+      } else {
+        return sanitizedUrl;
+      }
+    }
+
     if (sanitizedUrl.includes("uploads/")) {
       const index = sanitizedUrl.indexOf("uploads/");
       sanitizedUrl = sanitizedUrl.slice(index);
     } else {
-      sanitizedUrl = `uploads/${sanitizedUrl.startsWith("/") ? sanitizedUrl.slice(1) : sanitizedUrl}`;
+      const temp = sanitizedUrl.startsWith("/") ? sanitizedUrl.slice(1) : sanitizedUrl;
+      sanitizedUrl = `uploads/${temp}`;
     }
-    if (sanitizedUrl === "undefined" || sanitizedUrl === "null") return "";
-    return `${API_URL}${sanitizedUrl.startsWith("/") ? "" : "/"}${sanitizedUrl}`;
+
+    if (
+      sanitizedUrl === "undefined" ||
+      sanitizedUrl === "null" ||
+      sanitizedUrl.endsWith("/undefined") ||
+      sanitizedUrl.endsWith("/null")
+    ) {
+      return "";
+    }
+
+    const cleanApiUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+    const cleanPath = sanitizedUrl.startsWith("/") ? sanitizedUrl : `/${sanitizedUrl}`;
+
+    return `${cleanApiUrl}${cleanPath}`;
   };
 
   const getDoc = (type) => {
