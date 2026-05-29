@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import {
   Package,
@@ -14,7 +14,10 @@ import {
   FileText,
   ShieldCheck,
   Calendar,
-  Activity
+  Activity,
+  User,
+  Clock,
+  Search
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -263,111 +266,145 @@ const Dashboard = () => {
 
   const getCategoryBadgeClass = (category) => {
     const cat = (category || "").toLowerCase();
-    if (cat.includes("vehicle")) return "bg-indigo-50 text-indigo-700 border border-indigo-200";
-    if (cat.includes("appliance") || cat.includes("kitchen")) return "bg-amber-50 text-amber-700 border border-amber-200";
-    if (cat.includes("comfort")) return "bg-emerald-50 text-emerald-700 border border-emerald-200";
-    return "bg-gray-50 text-gray-700 border border-gray-200";
+    if (cat.includes("vehicle")) return "bg-indigo-50 text-indigo-700 border border-indigo-200/60";
+    if (cat.includes("appliance") || cat.includes("kitchen")) return "bg-amber-50 text-amber-700 border border-amber-200/60";
+    if (cat.includes("comfort")) return "bg-emerald-50 text-emerald-700 border border-emerald-200/60";
+    return "bg-gray-50 text-gray-700 border border-gray-200/60";
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500 bg-gray-50 w-full">
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-          <span className="font-semibold text-xs tracking-wide text-gray-400">Loading Dashboard...</span>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="font-semibold text-xs tracking-wider text-gray-400 uppercase">Loading Dashboard Systems...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full m-0 bg-gray-50 text-gray-800 font-sans flex flex-col">
+    <div className="w-full m-0 bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
       
       {apiError && (
-        <div className="bg-red-50 border-b border-red-100 text-red-700 px-4 py-2.5 text-xs font-semibold text-center flex items-center justify-center gap-2">
-          <ShieldAlert size={14} />
-          <span>Server Error: {apiError}. Please login again or check if server is running.</span>
+        <div className="bg-red-50 border-b border-red-100 text-red-700 px-4 py-3 text-xs font-semibold text-center flex items-center justify-center gap-2">
+          <ShieldAlert size={14} className="animate-bounce" />
+          <span>Server Connection Issue: {apiError}. Please double-check your API or sign in again.</span>
         </div>
       )}
 
-      <div className="p-4 lg:p-6 space-y-5 w-full max-w-full">
+      <div className="p-4 lg:p-6 space-y-6 w-full max-w-full">
 
-        {/* Action Bar */}
-        <div className="flex items-center justify-between pb-1">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-500">System Live Metrics</span>
-          </div>
-          
-          <Button
-            component={Link}
-            to="/items/new"
-            variant="contained"
-            startIcon={<PlusCircle size={14} />}
-            sx={{
-              backgroundColor: "#4f46e5",
-              color: "#ffffff",
-              fontWeight: "600",
-              borderRadius: "8px",
-              textTransform: "none",
-              fontSize: "12px",
-              padding: "6px 16px",
-              boxShadow: "0px 2px 4px rgba(79, 70, 229, 0.2)",
-              fontFamily: "inherit",
-              "&:hover": {
-                backgroundColor: "#4338ca",
-                boxShadow: "0px 4px 12px rgba(79, 70, 229, 0.3)",
-              },
-            }}
-          >
-            Quick Add
-          </Button>
-        </div>
-
-        {/* PROFESSIONAL STAT CARDS - White background with colored accents */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
-          <Link to="/items" className="block transform hover:-translate-y-0.5 transition-all duration-200">
-            <StatCard title="Total Assets" value={totalItems} subtitle="All items in system" icon={Package} accentColor="indigo" />
-          </Link>
-
-          <Link to="/reminders" className="block transform hover:-translate-y-0.5 transition-all duration-200">
-            <StatCard title="Warranty Expiring" value={warrantyCount} subtitle="Active next 30 days" icon={ShieldCheck} accentColor="emerald" />
-          </Link>
-
-          <Link to="/maintenance" className="block transform hover:-translate-y-0.5 transition-all duration-200">
-            <StatCard title="Maintenance Due" value={serviceCount} subtitle="Active next 7 days" icon={Wrench} accentColor="amber" />
-          </Link>
-
-          <Link to="/documents" className="block transform hover:-translate-y-0.5 transition-all duration-200">
-            <StatCard title="Total Documents" value={totalItems ? summary?.totalDocuments : 0} subtitle="Bills & certificates" icon={FileText} accentColor="cyan" />
-          </Link>
-        </div>
-
-        {/* FEEDS ROW */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
-          
-          {/* Maintenance Feed */}
-          <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
+        {/* PROFILE HEADER PANEL */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-10 -mt-10 opacity-40 blur-lg pointer-events-none"></div>
+          <div className="flex items-center gap-4 z-10">
+            <div className="relative">
+              <img 
+                src={user.profilePic} 
+                alt={user.name} 
+                className="w-12 h-12 rounded-xl object-cover border-2 border-indigo-50 shadow-sm"
+              />
+              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+            </div>
+            <div>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                  <Wrench size={14} />
+                <h1 className="text-lg font-bold text-gray-900 tracking-tight">Welcome, {user.name}</h1>
+                <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border border-indigo-100">{user.role}</span>
+              </div>
+              <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
+                <Clock size={12} className="text-gray-400" />
+                <span>Last updated just now</span>
+                <span className="text-gray-300">•</span>
+                <span>{new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 z-10 shrink-0">
+            <div className="text-right hidden md:block mr-2">
+              <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider block">Operational Health</span>
+              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1 justify-end mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Active & Secure
+              </span>
+            </div>
+            
+            <Button
+              component={Link}
+              to="/items/new"
+              variant="contained"
+              startIcon={<PlusCircle size={14} />}
+              sx={{
+                backgroundColor: "#4f46e5",
+                color: "#ffffff",
+                fontWeight: "600",
+                borderRadius: "10px",
+                textTransform: "none",
+                fontSize: "12px",
+                padding: "8px 18px",
+                boxShadow: "0px 2px 4px rgba(79, 70, 229, 0.2)",
+                fontFamily: "inherit",
+                "&:hover": {
+                  backgroundColor: "#4338ca",
+                  boxShadow: "0px 4px 12px rgba(79, 70, 229, 0.3)",
+                },
+              }}
+            >
+              Quick Add Asset
+            </Button>
+          </div>
+        </div>
+
+        {/* STATS SECTION */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+          <Link to="/items" className="block transform hover:-translate-y-1 transition-all duration-300">
+            <StatCard title="Total Assets" value={totalItems} subtitle="Registered active devices" icon={Package} accentColor="indigo" progress={100} />
+          </Link>
+
+          <Link to="/reminders" className="block transform hover:-translate-y-1 transition-all duration-300">
+            <StatCard title="Warranty Expiring" value={warrantyCount} subtitle="Due within 30 days" icon={ShieldCheck} accentColor="emerald" progress={totalItems ? Math.round((warrantyCount / totalItems) * 100) : 0} />
+          </Link>
+
+          <Link to="/maintenance" className="block transform hover:-translate-y-1 transition-all duration-300">
+            <StatCard title="Maintenance Due" value={serviceCount} subtitle="Needs actions this week" icon={Wrench} accentColor="amber" progress={totalItems ? Math.round((serviceCount / totalItems) * 100) : 0} />
+          </Link>
+
+          <Link to="/documents" className="block transform hover:-translate-y-1 transition-all duration-300">
+            <StatCard title="Total Documents" value={totalItems ? summary?.totalDocuments : 0} subtitle="Warranty papers & invoices" icon={FileText} accentColor="cyan" progress={75} />
+          </Link>
+        </div>
+
+        {/* PIPELINES GRID */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 w-full">
+          
+          {/* Maintenance Pipeline Card */}
+          <section className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+                  <Wrench size={15} />
                 </div>
-                <h3 className="font-semibold text-xs uppercase tracking-wide text-gray-700">Maintenance Pipelines</h3>
+                <div>
+                  <h3 className="font-bold text-sm text-gray-800 tracking-tight">Maintenance Pipelines</h3>
+                  <p className="text-[10px] text-gray-400 font-medium">Overdue & upcoming service alerts</p>
+                </div>
               </div>
               
-              <div className="flex items-center gap-1">
-                <Tooltip title="Filter list">
+              <div className="flex items-center gap-1.5">
+                <Tooltip title="Toggle Filter">
                   <IconButton
                     onClick={() => setFilterOpen(!filterOpen)}
                     size="small"
                     sx={{
-                      color: "#6b7280",
-                      padding: "4px",
+                      color: filterOpen ? "#4f46e5" : "#6b7280",
+                      padding: "6px",
+                      backgroundColor: filterOpen ? "rgba(79, 70, 229, 0.05)" : "transparent",
+                      border: "1px solid",
+                      borderColor: filterOpen ? "rgba(79, 70, 229, 0.2)" : "rgba(229, 231, 235, 0.8)",
                       "&:hover": { color: "#4f46e5", backgroundColor: "rgba(79, 70, 229, 0.05)" }
                     }}
                   >
-                    <Filter size={14} />
+                    <Filter size={13} />
                   </IconButton>
                 </Tooltip>
 
@@ -378,91 +415,100 @@ const Dashboard = () => {
                   endIcon={<ArrowRight size={12} />}
                   sx={{
                     color: "#4f46e5",
-                    fontWeight: "600",
+                    fontWeight: "700",
                     fontSize: "11px",
                     textTransform: "none",
                     fontFamily: "inherit",
-                    padding: "1px 6px",
+                    padding: "4px 8px",
+                    borderRadius: "6px",
                     "&:hover": {
                       color: "#4338ca",
-                      backgroundColor: "rgba(79, 70, 229, 0.08)"
+                      backgroundColor: "rgba(79, 70, 229, 0.05)"
                     }
                   }}
                 >
-                  View
+                  View All
                 </Button>
               </div>
             </div>
 
             {filterOpen && (
-              <div className="mb-3 animate-fadeIn">
+              <div className="mb-3 relative animate-fadeIn">
+                <Search size={12} className="absolute left-2.5 top-2.5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Filter by name..."
+                  placeholder="Quick search pipeline item..."
                   value={maintenanceFilter}
                   onChange={(e) => setMaintenanceFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50"
+                  className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-200 text-xs outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50/50"
                 />
               </div>
             )}
 
-            <div className="space-y-2 flex-1">
-              {filteredReminders
-                .filter((r) => r.type === "service")
-                .slice(0, 3)
-                .map((reminder, idx) => (
-                  <div 
-                    key={idx} 
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-all duration-150 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0">
-                        {reminder.imgUrl ? (
-                          <img 
-                            src={reminder.imgUrl} 
-                            alt={reminder.itemName} 
-                            className="w-full h-full object-cover" 
-                            onError={(e) => { 
-                              e.currentTarget.onerror = null; 
-                              e.currentTarget.src = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=80&auto=format&fit=crop&q=60"; 
-                            }} 
-                          />
-                        ) : (
-                          <span className="text-[9px] text-gray-500 font-bold">
-                            {reminder.itemName ? reminder.itemName.slice(0, 2).toUpperCase() : "MN"}
-                          </span>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <p className="font-semibold text-sm text-gray-800 leading-tight">{reminder.itemName}</p>
-                        <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-0.5">
-                          <Calendar size={9} />
-                          <span>{reminder.dueDate ? new Date(reminder.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}</span>
+            <div className="space-y-2.5 flex-1 mt-1">
+              {filteredReminders.filter((r) => r.type === "service").length > 0 ? (
+                filteredReminders
+                  .filter((r) => r.type === "service")
+                  .slice(0, 3)
+                  .map((reminder, idx) => (
+                    <div 
+                      key={idx} 
+                      className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-150 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
+                          {reminder.imgUrl ? (
+                            <img 
+                              src={reminder.imgUrl} 
+                              alt={reminder.itemName} 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => { 
+                                e.currentTarget.onerror = null; 
+                                e.currentTarget.src = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=80&auto=format&fit=crop&q=60"; 
+                              }} 
+                            />
+                          ) : (
+                            <span className="text-[10px] text-gray-400 font-bold">
+                              {reminder.itemName ? reminder.itemName.slice(0, 2).toUpperCase() : "MN"}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <p className="font-bold text-sm text-gray-800 leading-tight">{reminder.itemName}</p>
+                          <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mt-1">
+                            <Calendar size={11} className="text-gray-400" />
+                            <span>{reminder.dueDate ? new Date(reminder.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}</span>
+                          </div>
                         </div>
                       </div>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider ${
+                        reminder.statusColor === "red" ? "bg-red-50 text-red-600 border-red-200/60" : "bg-amber-50 text-amber-700 border-amber-200/60"
+                      }`}>
+                        {reminder.badgeText}
+                      </span>
                     </div>
-                    <span className={`text-[9px] font-bold px-2 py-1 rounded border uppercase tracking-wider ${
-                      reminder.statusColor === "red" ? "bg-red-50 text-red-600 border-red-200" : "bg-amber-50 text-amber-700 border-amber-200"
-                    }`}>
-                      {reminder.badgeText}
-                    </span>
-                  </div>
-                ))}
-              {filteredReminders.filter((r) => r.type === "service").length === 0 && (
-                <div className="flex items-center justify-center h-20 text-gray-400 text-xs font-medium">No active maintenance events.</div>
+                  ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200/80">
+                  <Activity size={20} className="text-gray-300 mb-1.5" />
+                  <span className="text-xs font-semibold text-gray-400">All services are up-to-date</span>
+                </div>
               )}
             </div>
           </section>
 
-          {/* Warranty Feed */}
-          <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <ShieldCheck size={14} />
+          {/* Warranty Pipeline Card */}
+          <section className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                  <ShieldCheck size={15} />
                 </div>
-                <h3 className="font-semibold text-xs uppercase tracking-wide text-gray-700">Warranty Lockouts</h3>
+                <div>
+                  <h3 className="font-bold text-sm text-gray-800 tracking-tight">Warranty Lockouts</h3>
+                  <p className="text-[10px] text-gray-400 font-medium">Expiring manufacturer warranties</p>
+                </div>
               </div>
               
               <Button
@@ -472,163 +518,171 @@ const Dashboard = () => {
                 endIcon={<ArrowRight size={12} />}
                 sx={{
                   color: "#4f46e5",
-                  fontWeight: "600",
+                  fontWeight: "700",
                   fontSize: "11px",
                   textTransform: "none",
                   fontFamily: "inherit",
-                  padding: "1px 6px",
+                  padding: "4px 8px",
+                  borderRadius: "6px",
                   "&:hover": {
                     color: "#4338ca",
-                    backgroundColor: "rgba(79, 70, 229, 0.08)"
+                    backgroundColor: "rgba(79, 70, 229, 0.05)"
                   }
                 }}
               >
-                View
+                View All
               </Button>
             </div>
 
-            <div className="space-y-2 flex-1">
-              {reminders
-                .filter((r) => r.type === "warranty")
-                .slice(0, 3)
-                .map((reminder, idx) => (
-                  <div 
-                    key={idx} 
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-all duration-150 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0">
-                        {reminder.imgUrl ? (
-                          <img 
-                            src={reminder.imgUrl} 
-                            alt={reminder.itemName} 
-                            className="w-full h-full object-cover" 
-                            onError={(e) => { 
-                              e.currentTarget.onerror = null; 
-                              e.currentTarget.src = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=80&auto=format&fit=crop&q=60"; 
-                            }} 
-                          />
-                        ) : (
-                          <span className="text-[9px] text-gray-500 font-bold">
-                            {reminder.itemName ? reminder.itemName.slice(0, 2).toUpperCase() : "WR"}
-                          </span>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <p className="font-semibold text-sm text-gray-800 leading-tight">{reminder.itemName}</p>
-                        <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-0.5">
-                          <Calendar size={9} />
-                          <span>{reminder.dueDate ? new Date(reminder.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}</span>
+            <div className="space-y-2.5 flex-1 mt-1">
+              {reminders.filter((r) => r.type === "warranty").length > 0 ? (
+                reminders
+                  .filter((r) => r.type === "warranty")
+                  .slice(0, 3)
+                  .map((reminder, idx) => (
+                    <div 
+                      key={idx} 
+                      className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all duration-150 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
+                          {reminder.imgUrl ? (
+                            <img 
+                              src={reminder.imgUrl} 
+                              alt={reminder.itemName} 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => { 
+                                e.currentTarget.onerror = null; 
+                                e.currentTarget.src = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=80&auto=format&fit=crop&q=60"; 
+                              }} 
+                            />
+                          ) : (
+                            <span className="text-[10px] text-gray-400 font-bold">
+                              {reminder.itemName ? reminder.itemName.slice(0, 2).toUpperCase() : "WR"}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <p className="font-bold text-sm text-gray-800 leading-tight">{reminder.itemName}</p>
+                          <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mt-1">
+                            <Calendar size={11} className="text-gray-400" />
+                            <span>{reminder.dueDate ? new Date(reminder.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}</span>
+                          </div>
                         </div>
                       </div>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider ${
+                        reminder.statusColor === "red" ? "bg-red-50 text-red-600 border-red-200/60" : "bg-amber-50 text-amber-700 border-amber-200/60"
+                      }`}>
+                        {reminder.badgeText}
+                      </span>
                     </div>
-                    <span className={`text-[9px] font-bold px-2 py-1 rounded border uppercase tracking-wider ${
-                      reminder.statusColor === "red" ? "bg-red-50 text-red-600 border-red-200" : "bg-amber-50 text-amber-700 border-amber-200"
-                    }`}>
-                      {reminder.badgeText}
-                    </span>
-                  </div>
-                ))}
-              {reminders.filter((r) => r.type === "warranty").length === 0 && (
-                <div className="flex items-center justify-center h-20 text-gray-400 text-xs font-medium">No active warranty alerts.</div>
+                  ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200/80">
+                  <ShieldCheck size={20} className="text-gray-300 mb-1.5" />
+                  <span className="text-xs font-semibold text-gray-400">All warranties are highly secure</span>
+                </div>
               )}
             </div>
           </section>
         </div>
 
-        {/* ALL ASSETS TABLE */}
-        <section className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 w-full">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-sm text-gray-900 tracking-tight">All Assets</h3>
+        {/* RECENT ASSETS SECTION */}
+        <section className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-3 border-b border-gray-100">
+            <div>
+              <h3 className="font-bold text-base text-gray-900 tracking-tight">System Live Inventory</h3>
+              <p className="text-[11px] text-gray-400 font-medium">Manage and track your newly added devices and assets</p>
+            </div>
             
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => setAssetFilterOpen(!assetFilterOpen)}
                 variant="outlined"
-                startIcon={<Filter size={14} />}
+                startIcon={<Filter size={13} />}
                 sx={{
-                  borderColor: "#d1d5db",
-                  color: "#4f46e5",
+                  borderColor: assetFilterOpen ? "#4f46e5" : "#e5e7eb",
+                  color: assetFilterOpen ? "#4f46e5" : "#4b5563",
                   borderRadius: "8px",
                   textTransform: "none",
                   fontSize: "11px",
                   fontWeight: "600",
                   fontFamily: "inherit",
-                  padding: "5px 12px",
+                  padding: "5px 14px",
+                  backgroundColor: assetFilterOpen ? "rgba(79, 70, 229, 0.04)" : "transparent",
                   "&:hover": {
                     borderColor: "#4f46e5",
-                    backgroundColor: "rgba(79, 70, 229, 0.08)"
+                    backgroundColor: "rgba(79, 70, 229, 0.06)"
                   }
                 }}
               >
-                Filter
+                {assetFilterOpen ? "Active Filters" : "Filter Assets"}
               </Button>
 
               <Button
                 component={Link}
-                to="/items/new"
+                to="/items"
                 variant="contained"
-                startIcon={<PlusCircle size={14} />}
                 sx={{
-                  backgroundColor: "#4f46e5",
-                  color: "#ffffff",
+                  backgroundColor: "#ffffff",
+                  color: "#4f46e5",
                   fontWeight: "600",
                   borderRadius: "8px",
                   textTransform: "none",
                   fontSize: "11px",
+                  border: "1px solid rgba(79, 70, 229, 0.2)",
                   fontFamily: "inherit",
-                  padding: "5px 12px",
-                  boxShadow: "0px 2px 4px rgba(79, 70, 229, 0.2)",
+                  padding: "5px 14px",
                   "&:hover": {
-                    backgroundColor: "#4338ca",
-                    boxShadow: "0px 4px 12px rgba(79, 70, 229, 0.3)"
+                    backgroundColor: "rgba(79, 70, 229, 0.04)",
                   }
                 }}
               >
-                Add Asset
+                View Full Logs
               </Button>
             </div>
           </div>
 
           {assetFilterOpen && (
-            <div className="mb-3 animate-fadeIn">
+            <div className="mb-4 relative animate-fadeIn">
+              <Search size={14} className="absolute left-3 top-2.5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search table locally..."
+                placeholder="Search across assets, brand or category logs..."
                 value={localAssetFilter}
                 onChange={(e) => setLocalAssetFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 text-xs outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50/50"
               />
             </div>
           )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[650px]">
+          <div className="overflow-x-auto rounded-xl border border-gray-100">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
-                <tr className="border-b border-gray-100 text-gray-500 font-semibold text-[10px] uppercase tracking-wider">
-                  <th className="py-2.5 px-2">Asset</th>
-                  <th className="py-2.5 px-2">Category</th>
-                  <th className="py-2.5 px-2">Brand</th>
-                  <th className="py-2.5 px-2">Purchase Date</th>
-                  <th className="py-2.5 px-2">Warranty Expiry</th>
-                  <th className="py-2.5 px-2">Maintenance Date</th>
-                  <th className="py-2.5 px-2">Status</th>
-                  <th className="py-2.5 px-2 text-center">Action</th>
+                <tr className="bg-gray-50/80 border-b border-gray-100 text-gray-500 font-bold text-[10px] uppercase tracking-wider">
+                  <th className="py-3 px-3">Asset Description</th>
+                  <th className="py-3 px-3">Classification</th>
+                  <th className="py-3 px-3">Brand</th>
+                  <th className="py-3 px-3">Purchase Date</th>
+                  <th className="py-3 px-3">Warranty Expiry</th>
+                  <th className="py-3 px-3">Maintenance Date</th>
+                  <th className="py-3 px-3">Status</th>
+                  <th className="py-3 px-3 text-center">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 text-xs">
+              <tbody className="divide-y divide-gray-100 text-xs">
                 {filteredAssets.map((item, idx) => {
                   const imageSrc = getImageUrl(item);
                   return (
                     <tr
                       key={item._id || idx}
-                      className="hover:bg-indigo-50/50 hover:shadow-xs transition-all duration-150 cursor-pointer group"
+                      className="hover:bg-indigo-50/30 transition-all duration-150 cursor-pointer group"
                       onClick={() => navigate(`/items/${item._id}`)}
                     >
-                      <td className="py-3 px-2">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden shrink-0 shadow-sm transition-transform group-hover:scale-102">
                             {imageSrc ? (
                               <img
                                 src={imageSrc}
@@ -640,38 +694,41 @@ const Dashboard = () => {
                                 }}
                               />
                             ) : (
-                              <span className="text-[9px] text-gray-500 font-bold">
+                              <span className="text-[10px] text-gray-400 font-bold">
                                 {item.itemName ? item.itemName.slice(0, 2).toUpperCase() : "AS"}
                               </span>
                             )}
                           </div>
-                          <p className="font-semibold text-sm text-gray-800 leading-snug group-hover:text-indigo-600 transition-colors">
-                            {item.itemName}
-                          </p>
+                          <div>
+                            <p className="font-bold text-sm text-gray-800 leading-snug group-hover:text-indigo-600 transition-colors">
+                              {item.itemName}
+                            </p>
+                            <span className="text-[9px] text-gray-400 font-semibold block mt-0.5">ID: {String(item._id || idx).slice(-6).toUpperCase()}</span>
+                          </div>
                         </div>
                       </td>
-                      <td className="py-3 px-2">
-                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-semibold ${getCategoryBadgeClass(item.category)}`}>
-                          {item.category || "N/A"}
+                      <td className="py-3 px-3">
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${getCategoryBadgeClass(item.category)}`}>
+                          {item.category || "General"}
                         </span>
                       </td>
-                      <td className="py-3 px-2 text-gray-700 font-medium">{item.brand || "N/A"}</td>
-                      <td className="py-3 px-2 text-gray-500 font-medium">{formatDate(item.purchaseDate)}</td>
-                      <td className="py-3 px-2 text-emerald-600 font-semibold">{formatDate(item.warrantyExpiry)}</td>
-                      <td className="py-3 px-2 text-amber-600 font-semibold">{formatDate(item.maintenanceDate || item.nextServiceDate)}</td>
-                      <td className="py-3 px-2">
-                        <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full border ${
+                      <td className="py-3 px-3 text-gray-600 font-semibold">{item.brand || "N/A"}</td>
+                      <td className="py-3 px-3 text-gray-500 font-medium">{formatDate(item.purchaseDate)}</td>
+                      <td className="py-3 px-3 text-emerald-600 font-semibold">{formatDate(item.warrantyExpiry)}</td>
+                      <td className="py-3 px-3 text-amber-600 font-semibold">{formatDate(item.maintenanceDate || item.nextServiceDate)}</td>
+                      <td className="py-3 px-3">
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
                           item.statusColor === "red"
-                              ? "bg-red-50 text-red-600 border-red-200"
-                              : "bg-amber-50 text-amber-700 border-amber-200"
+                              ? "bg-red-50 text-red-600 border-red-200/60"
+                              : "bg-emerald-50 text-emerald-700 border-emerald-200/60"
                         }`}>
-                          {item.statusText || "Active"}
+                          {item.statusText || "Operational"}
                         </span>
                       </td>
 
-                      <td className="py-3 px-2">
+                      <td className="py-3 px-3">
                         <div className="flex items-center justify-center gap-1">
-                          <Tooltip title="Edit">
+                          <Tooltip title="Modify Asset">
                             <IconButton
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -680,18 +737,21 @@ const Dashboard = () => {
                               size="small"
                               sx={{
                                 color: "#9ca3af",
-                                padding: "4px",
+                                padding: "5px",
+                                border: "1px solid rgba(229, 231, 235, 0.8)",
+                                borderRadius: "6px",
                                 "&:hover": {
                                   color: "#06b6d4",
-                                  backgroundColor: "rgba(6, 182, 212, 0.08)",
+                                  borderColor: "rgba(6, 182, 212, 0.3)",
+                                  backgroundColor: "rgba(6, 182, 212, 0.05)",
                                 }
                               }}
                             >
-                              <PenSquare size={14} />
+                              <PenSquare size={13} />
                             </IconButton>
                           </Tooltip>
 
-                          <Tooltip title="Delete">
+                          <Tooltip title="Retire Asset">
                             <IconButton
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -700,14 +760,17 @@ const Dashboard = () => {
                               size="small"
                               sx={{
                                 color: "#9ca3af",
-                                padding: "4px",
+                                padding: "5px",
+                                border: "1px solid rgba(229, 231, 235, 0.8)",
+                                borderRadius: "6px",
                                 "&:hover": {
                                   color: "#ef4444",
-                                  backgroundColor: "rgba(239, 68, 68, 0.08)",
+                                  borderColor: "rgba(239, 68, 68, 0.3)",
+                                  backgroundColor: "rgba(239, 68, 68, 0.05)",
                                 }
                               }}
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={13} />
                             </IconButton>
                           </Tooltip>
                         </div>
@@ -717,8 +780,8 @@ const Dashboard = () => {
                 })}
                 {filteredAssets.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="py-6 text-center text-gray-400 font-medium text-xs">
-                      No assets found.
+                    <td colSpan="8" className="py-8 text-center text-gray-400 font-semibold text-xs bg-gray-50/50">
+                      No assets found matching the search filters.
                     </td>
                   </tr>
                 )}
@@ -726,9 +789,10 @@ const Dashboard = () => {
             </table>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-gray-100 flex justify-start">
-            <Link to="/items" className="text-indigo-600 hover:text-indigo-700 text-xs font-semibold flex items-center gap-1.5 transition">
-              View all assets <ArrowRight size={14} />
+          <div className="mt-4 pt-3 flex justify-between items-center text-xs text-gray-400">
+            <span>Showing recent log uploads</span>
+            <Link to="/items" className="text-indigo-600 hover:text-indigo-700 font-bold flex items-center gap-1.5 transition">
+              Explore Entire Warehouse <ArrowRight size={14} />
             </Link>
           </div>
         </section>
@@ -737,8 +801,8 @@ const Dashboard = () => {
   );
 };
 
-// PROFESSIONAL STAT CARD - White background with colored left accent
-const StatCard = ({ title, value, subtitle, icon: Icon, accentColor }) => {
+// PROFESSIONAL STAT CARD WITH GRADIENT PROGRESS SUB-INDICATORS
+const StatCard = ({ title, value, subtitle, icon: Icon, accentColor, progress }) => {
   const accentClasses = {
     indigo: "bg-indigo-600",
     emerald: "bg-emerald-500",
@@ -746,33 +810,50 @@ const StatCard = ({ title, value, subtitle, icon: Icon, accentColor }) => {
     cyan: "bg-cyan-500"
   };
 
+  const borderHoverClasses = {
+    indigo: "hover:border-indigo-300",
+    emerald: "hover:border-emerald-300",
+    amber: "hover:border-amber-300",
+    cyan: "hover:border-cyan-300"
+  };
+
   const iconBgClasses = {
-    indigo: "bg-indigo-50 text-indigo-600",
-    emerald: "bg-emerald-50 text-emerald-600",
-    amber: "bg-amber-50 text-amber-600",
-    cyan: "bg-cyan-50 text-cyan-600"
+    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100",
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    amber: "bg-amber-50 text-amber-600 border-amber-100",
+    cyan: "bg-cyan-50 text-cyan-600 border-cyan-100"
   };
 
   return (
-    <div className="relative bg-white rounded-xl p-4 border border-gray-200 hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200 ease-out cursor-pointer flex flex-col justify-between overflow-hidden group shadow-sm">
+    <div className={`relative bg-white rounded-2xl p-4.5 border border-gray-200 transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between overflow-hidden group shadow-sm ${borderHoverClasses[accentColor]}`}>
       
-      <div className={`absolute left-0 top-0 bottom-0 w-1 ${accentClasses[accentColor]}`}></div>
+      {/* Structural Accent Top Line */}
+      <div className={`absolute left-0 right-0 top-0 h-1.5 ${accentClasses[accentColor]} opacity-80`}></div>
 
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between mt-1">
         <div className="flex flex-col">
-          <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1 leading-none">{value}</p>
-          <p className="text-[10px] text-gray-500 mt-1 font-medium leading-none">{subtitle}</p>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{title}</p>
+          <p className="text-2xl font-black text-gray-900 mt-1 leading-none tracking-tight">{value}</p>
+          <p className="text-[10px] text-gray-400 mt-2 font-semibold leading-tight">{subtitle}</p>
         </div>
         
-        <div className={`w-9 h-9 rounded-lg ${iconBgClasses[accentColor]} flex items-center justify-center shadow-sm shrink-0 group-hover:scale-105 transition-transform duration-200`}>
+        <div className={`w-9.5 h-9.5 rounded-xl border ${iconBgClasses[accentColor]} flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform duration-200`}>
           <Icon size={16} />
         </div>
       </div>
 
-      <div className="mt-3 pt-2.5 border-t border-gray-100 flex justify-between items-center">
-        <div className={`w-10 h-0.5 rounded-full bg-gradient-to-r ${accentClasses[accentColor]} to-transparent opacity-30 group-hover:opacity-60 transition-opacity`}></div>
-        <Activity size={10} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
+      {/* Polish Indicator: Micro-Bar Graph inside each card */}
+      <div className="mt-4 pt-3.5 border-t border-gray-100/80 flex flex-col gap-1.5">
+        <div className="flex items-center justify-between text-[9px] font-bold text-gray-400">
+          <span>PIPELINE</span>
+          <span>{progress}%</span>
+        </div>
+        <div className="w-full bg-gray-100 rounded-full h-1 overflow-hidden">
+          <div 
+            className={`h-full rounded-full transition-all duration-500 ${accentClasses[accentColor]}`} 
+            style={{ width: `${Math.max(8, progress)}%` }}
+          ></div>
+        </div>
       </div>
     </div>
   );
